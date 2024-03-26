@@ -8,6 +8,8 @@ export interface IUserRegistrationGateway {
     replaceRequest: LoginRequestDto,
   ): Promise<LoginResponseDto>;
   login(loginRequest: LoginRequestDto): Promise<LoginResponseDto>;
+  logout(accessToken: string): Promise<void>;
+  revokeRefreshToken(refreshToken: string): Promise<void>;
 }
 
 export const UserRegistrationGatewayType = Symbol('IUserRegistrationGateway');

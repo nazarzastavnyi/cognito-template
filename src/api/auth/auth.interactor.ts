@@ -30,4 +30,12 @@ export class AuthInteractor {
   async login(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
     return await this.userRegistrationGateway.login(loginRequest);
   }
+
+  async logout(accessToken: string): Promise<void> {
+    return await this.userRegistrationGateway.logout(accessToken);
+  }
+
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
+    return await this.userRegistrationGateway.revokeRefreshToken(refreshToken);
+  }
 }

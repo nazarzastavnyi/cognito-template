@@ -16,6 +16,10 @@ import {
   RespondToAuthChallengeCommandOutput,
   RespondToAuthChallengeCommandInput,
   RespondToAuthChallengeCommand,
+  GlobalSignOutCommandInput,
+  GlobalSignOutCommand,
+  RevokeTokenCommandInput,
+  RevokeTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { IUserRegistrationGateway } from '@common/gateways/interfaces/i-user-registration.gateway';
 import * as crypto from 'crypto';
@@ -140,6 +144,39 @@ class CognitoGateway implements IUserRegistrationGateway {
         `Login failed: ${error.message}`,
         HttpStatus.UNAUTHORIZED,
       );
+    }
+  }
+
+  async logout(accessToken: string): Promise<void> {
+    try {
+      const signOutParams: GlobalSignOutCommandInput = {
+        AccessToken: accessToken,
+      };
+
+      await this.client.send(new GlobalSignOutCommand(signOutParams));
+
+      console.log('Logout successful');
+    } catch (error) {
+      throw new HttpException(
+        `Logout failed: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
+    const revokeParams: RevokeTokenCommandInput = {
+      Token: refreshToken,
+      ClientId: this.clientId,
+      ClientSecret: this.clientSecret,
+    };
+
+    try {
+      await this.client.send(new RevokeTokenCommand(revokeParams));
+      console.log('Token revoked successfully');
+    } catch (error) {
+      console.error('Token revocation failed:', error);
+      throw new Error('Token revocation failed');
     }
   }
 
