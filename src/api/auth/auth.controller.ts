@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import JwtAuthenticationGuard from '@common/auth/guards/jwt.guard';
 import { RegisterCommand } from '@api/auth/dto/register.command';
 import { AuthInteractor } from '@api/auth/auth.interactor';
+import LoginRequestDto from './dto/login.request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,6 +16,13 @@ export class AuthController {
   async register(@Body() registerRequest: RegisterRequestDto) {
     const registerCommand = new RegisterCommand(registerRequest.email);
     await this.authService.register(registerCommand);
+  }
+
+  @ApiOperation({ summary: 'Login user.' })
+  @ApiTags('user')
+  @Post('login')
+  async login(@Body() loginRequest: LoginRequestDto) {
+    return await this.authService.login(loginRequest);
   }
 
   @ApiOperation({ summary: 'Validate jwt token' })
