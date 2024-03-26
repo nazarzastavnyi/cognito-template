@@ -4,6 +4,9 @@ import {
   AdminCreateUserCommand,
   AdminCreateUserCommandInput,
   AdminCreateUserCommandOutput,
+  AdminInitiateAuthCommand,
+  AdminInitiateAuthCommandOutput,
+  AdminUserGlobalSignOutCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
 @Injectable()
@@ -37,6 +40,38 @@ class CognitoGateway {
       .catch((err) => {
         throw new Error(err.message);
       });
+  }
+
+  async signIn(email: string, password: string) {
+    const command = new AdminInitiateAuthCommand({
+      UserPoolId: process.env.USER_POOL_ID || '',
+      ClientId: process.env.CLIENT_ID || '',
+      AuthFlow: 'ADMIN_NO_SRP_AUTH',
+      AuthParameters: {
+        USERNAME: email,
+        PASSWORD: password,
+      },
+    });
+
+    try {
+      const { AuthenticationResult } = await this.client.send(command) as AdminInitiateAuthCommandOutput;
+      return AuthenticationResult;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async signOut(email: string) {
+    const command = new AdminUserGlobalSignOutCommand({
+      UserPoolId: process.env.USER_POOL_ID || '',
+      Username: email,
+    });
+
+    try {
+      return await this.client.send(command);
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 }
 
