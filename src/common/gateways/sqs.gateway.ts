@@ -26,9 +26,9 @@ export class SqsGateway implements INotificationGateway {
       MessageGroupId: group,
       DelaySeconds: 0,
     };
-    return this.sqsClient.send(new SendMessageCommand(params)).catch((err) => {
+    /*return this.sqsClient.send(new SendMessageCommand(params)).catch((err) => {
       throw err;
-    });
+    });*/
   }
 
   async sendNotificationMessage(messageBody: any): Promise<boolean> {

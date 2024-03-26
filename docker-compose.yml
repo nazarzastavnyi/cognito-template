@@ -1,0 +1,25 @@
+# version of docker-compose
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    env_file: ./.env
+    ports:
+      - '${DB_PORT}:5432'
+    expose:
+      - '${DB_PORT}'  
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_ROOT_PASS}
+      POSTGRES_USER: ${DB_USER}
+      PGPASSWORD: ${DB_PASS}
+    volumes:
+      - db:/var/lib/postgres
+    stdin_open: true
+    tty: true
+
+volumes:
+  db:
