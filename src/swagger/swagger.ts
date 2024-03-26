@@ -6,6 +6,7 @@ export default (app) => {
     .setDescription('Nest.js Cognito Template implementation')
     .setVersion('1.0')
     .addTag('Template')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);

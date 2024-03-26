@@ -1,7 +1,12 @@
 import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import RegisterRequestDto from './dto/register.request.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import JwtAuthenticationGuard from '@common/auth/guards/jwt.guard';
 
 @Controller('auth')
@@ -17,6 +22,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Validate jwt token' })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthenticationGuard)
   @Get('validate')
   validateToken(@Req() request) {
