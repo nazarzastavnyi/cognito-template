@@ -3,10 +3,8 @@ import { AuthService } from './auth.service';
 import RegisterRequestDto from './dto/register.request.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import JwtAuthenticationGuard from '@common/auth/guards/jwt.guard';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
-@UseGuards(JwtAuthenticationGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -19,7 +17,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Validate jwt token' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthenticationGuard)
   @Get('validate')
   validateToken(@Req() request) {
     return { statusCode: 200, message: 'Token is valid' };

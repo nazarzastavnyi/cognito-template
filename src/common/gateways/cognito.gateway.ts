@@ -32,7 +32,7 @@ class CognitoGateway {
       ],
     });
 
-    return await this.client
+    return this.client
       .send<AdminCreateUserCommandInput, AdminCreateUserCommandOutput>(command)
       .catch((err) => {
         throw new Error(err.message);

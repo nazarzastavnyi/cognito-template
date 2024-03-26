@@ -25,20 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any) {
-    const client = new CognitoIdentityProviderClient({
-      region: 'Your AWS region',
-    }); // Replace this with your AWS region
-    const command = new GetUserCommand({ AccessToken: payload.token });
-
-    try {
-      const data = (await client.send(command)) as GetUserCommandOutput;
-      if (data.Username === payload.sub) {
-        return payload;
-      } else {
-        throw new UnauthorizedException();
-      }
-    } catch (error) {
-      throw new UnauthorizedException();
-    }
+    return !!payload;
   }
 }
