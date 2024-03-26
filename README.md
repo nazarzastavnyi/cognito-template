@@ -1,74 +1,42 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Cognito Integration Template for Nest.js
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This template provides a foundation for integrating Amazon Cognito with Nest.js applications. Amazon Cognito offers robust authentication, authorization, and user management capabilities, making it an excellent choice for securing web applications.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Authentication**: Seamlessly integrate Amazon Cognito authentication with Nest.js, providing secure access to your application.
+- **Authorization**: Implement role-based access control (RBAC) using Amazon Cognito user groups and attributes.
+- **User Management**: Leverage Amazon Cognito's user management features for user registration, login, password recovery, and account management.
+- **Customization**: Extend the template to suit your application's specific authentication and authorization requirements.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Dependencies
 
-## Installation
+The template utilizes the following dependencies:
 
-```bash
-$ pnpm install
-```
+- **@aws-sdk/client-cognito-identity-provider**: Official AWS SDK for interacting with Amazon Cognito's user pool.
+- **@nestjs/common**: Core Nest.js framework for building scalable applications.
+- **@nestjs/config**: Module for managing application configuration using environment variables.
+- **@nestjs/passport**: Nest.js module for implementing authentication strategies.
+- **@nestjs/jwt**: Module for JWT (JSON Web Token) authentication with Nest.js.
+- **dotenv**: Module for loading environment variables from a `.env` file.
+- **jwks-rsa**: Library for retrieving RSA signing keys from a JWKS (JSON Web Key Set) endpoint.
+- **passport-jwt**: Passport strategy for authenticating with a JSON Web Token (JWT).
+- **rxjs**: Library for reactive programming using Observables.
+- **reflect-metadata**: Library for adding metadata reflection capabilities to JavaScript decorators.
 
-## Running the app
+## Getting Started
 
-```bash
-# development
-$ pnpm run start
+1. **Install Dependencies**: Run `npm install` to install all required dependencies.
 
-# watch mode
-$ pnpm run start:dev
+2. **Set Environment Variables**: Create a `.env` file in the root directory of your project and add the necessary environment variables for configuring Amazon Cognito. For example:
+    ```
+    AWS_REGION=your_aws_region
+    AWS_COGNITO_USER_POOL_ID=your_user_pool_id
+    AWS_COGNITO_CLIENT_ID=your_client_id
+    ```
 
-# production mode
-$ pnpm run start:prod
-```
+3. **Implement Authentication Logic**: Implement the necessary authentication logic using the provided Nest.js modules and Amazon Cognito SDK.
 
-## Test
+4. **Testing**: Write unit and integration tests to ensure the correctness and reliability of your authentication implementation.
 
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
-# nest-cognito-template
+5. **Deployment**: Deploy your Nest.js application with integrated Amazon Cognito authentication to your preferred hosting platform.
