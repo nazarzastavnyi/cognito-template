@@ -19,10 +19,10 @@ export class AuthInteractor {
     await this.userRegistrationGateway.register(email);
   }
 
-  async replaceTemporaryPassword(
+  async confirmRegistration(
     replaceRequest: LoginRequestDto,
   ): Promise<LoginResponseDto> {
-    return await this.userRegistrationGateway.replaceTemporaryPassword(
+    return await this.userRegistrationGateway.confirmRegistration(
       replaceRequest,
     );
   }

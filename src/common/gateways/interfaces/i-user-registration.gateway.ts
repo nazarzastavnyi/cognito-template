@@ -4,7 +4,7 @@ import { LoginRequestDto } from '../../../api/auth/dto/login.request.dto';
 
 export interface IUserRegistrationGateway {
   register(email: string): Promise<UserType>;
-  replaceTemporaryPassword(
+  confirmRegistration(
     replaceRequest: LoginRequestDto,
   ): Promise<LoginResponseDto>;
   login(loginRequest: LoginRequestDto): Promise<LoginResponseDto>;
