@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import CognitoGateway from '@common/gateways/cognito.gateway';
 import { JwtStrategy } from '@common/auth/strategies/jwt.strategy';
+import { IUserRegistrationGateway } from '@common/gateways/interfaces/i-user-registration.gateway';
+import { AuthInteractor } from '@api/auth/auth.interactor';
 
 @Module({
   imports: [
@@ -19,6 +21,15 @@ import { JwtStrategy } from '@common/auth/strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, ConfigService, CognitoGateway, JwtStrategy],
+  providers: [
+    AuthService,
+    ConfigService,
+    JwtStrategy,
+    AuthInteractor,
+    {
+      provide: IUserRegistrationGateway,
+      useClass: CognitoGateway,
+    },
+  ],
 })
 export class AuthModule {}

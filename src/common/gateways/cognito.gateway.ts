@@ -5,9 +5,10 @@ import {
   AdminCreateUserCommandInput,
   AdminCreateUserCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider';
+import IUserRegistrationGateway from '@common/gateways/interfaces/i-user-registration.gateway';
 
 @Injectable()
-class CognitoGateway {
+class CognitoGateway implements IUserRegistrationGateway {
   private readonly client: CognitoIdentityProviderClient;
   private readonly userPoolId: string;
 
@@ -18,7 +19,7 @@ class CognitoGateway {
     this.userPoolId = process.env.AWS_COGNITO_USER_POOL_ID;
   }
 
-  async register(email: string) {
+  async register(email: string): Promise<boolean> {
     const command = new AdminCreateUserCommand({
       UserPoolId: this.userPoolId,
       DesiredDeliveryMediums: ['EMAIL'],
@@ -32,11 +33,13 @@ class CognitoGateway {
       ],
     });
 
-    return this.client
+    await this.client
       .send<AdminCreateUserCommandInput, AdminCreateUserCommandOutput>(command)
       .catch((err) => {
         throw new Error(err.message);
       });
+
+    return true;
   }
 }
 

@@ -1,5 +1,5 @@
-import { QueueGroups, SqsGateway } from '@common/gateways/sqs.gateway';
 import { Injectable } from '@nestjs/common';
+import { INotificationGateway } from '@common/gateways/interfaces/i-notification.gateway';
 
 export declare enum NotificationTypes {
   EMAIL,
@@ -7,19 +7,16 @@ export declare enum NotificationTypes {
 }
 @Injectable()
 export class NotificationService {
-  constructor(private readonly sqsGateway: SqsGateway) {}
+  constructor(private readonly notificationGateway: INotificationGateway) {}
   sendNotification(
     recipients: number[],
     text: string,
     types: NotificationTypes[],
   ) {
-    return this.sqsGateway.sendMessage(
-      {
-        recipients: recipients,
-        types: types,
-        text: text,
-      },
-      QueueGroups.NOTIFICATION,
-    );
+    return this.notificationGateway.sendNotificationMessage({
+      recipients: recipients,
+      types: types,
+      text: text,
+    });
   }
 }
