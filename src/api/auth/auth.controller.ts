@@ -1,11 +1,18 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import RegisterRequestDto from './dto/register.request.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RegisterCommand } from '@api/auth/dto/register.command';
 import { AuthInteractor } from '@api/auth/auth.interactor';
 import { LoginRequestDto } from './dto/login.request.dto';
 import { LoginResponseDto } from './dto/login.response.dto';
 import { AuthGuard } from '../../common/auth/guards/auth.guard';
+import { SuccessResponseDto } from './dto/success.response.dto';
+import { LogoutRequestDto } from './dto/logout.request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,14 +20,33 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Register new user. Availability: A.' })
   @ApiTags('user')
+  @ApiOkResponse({
+    status: 200,
+    type: SuccessResponseDto,
+    description:
+      'New user is registered. Temporary password is sent to user email.',
+  })
   @Post('register')
-  async register(@Body() registerRequest: RegisterRequestDto) {
+  async register(
+    @Body() registerRequest: RegisterRequestDto,
+  ): Promise<SuccessResponseDto> {
     const registerCommand = new RegisterCommand(registerRequest.email);
     await this.authService.register(registerCommand);
+    return {
+      success: true,
+      message:
+        'New user is registered. Temporary password is sent to user email.',
+    };
   }
 
   @ApiOperation({ summary: 'Replace temporary password.' })
   @ApiTags('user')
+  @ApiOkResponse({
+    status: 201,
+    type: LoginResponseDto,
+    description:
+      'Login successful after temporary password is replaced with new password.',
+  })
   @Post('password')
   async replaceTemporaryPassword(
     @Body() replaceRequest: LoginRequestDto,
@@ -30,6 +56,11 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Login user.' })
   @ApiTags('user')
+  @ApiOkResponse({
+    status: 201,
+    type: LoginResponseDto,
+    description: 'Login successful.',
+  })
   @Post('login')
   async login(
     @Body() loginRequest: LoginRequestDto,
@@ -41,6 +72,10 @@ export class AuthController {
   @ApiTags('user')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    status: 200,
+    description: 'Logout successful from all devices.',
+  })
   @Post('logout/all')
   async globalLogout(@Req() request): Promise<void> {
     const accessToken = request.headers.authorization.split(' ')[1];
@@ -54,24 +89,39 @@ export class AuthController {
   @ApiTags('user')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    status: 200,
+    description: 'Logout successful. Token revoked successfully.',
+  })
   @Post('logout')
-  async logout(@Body() refreshToken: string): Promise<void> {
-    await this.authService.revokeRefreshToken(refreshToken);
+  async logout(@Body() refreshToken: LogoutRequestDto): Promise<void> {
+    const token = refreshToken.refreshToken;
+    await this.authService.revokeRefreshToken(token);
   }
 
   @ApiOperation({
     summary:
-      'Represents the request to reset a user password as an administrator and to set the new user password..',
+      'Represents the request to reset a user password as an Administrator and to set the new user password.The password can be temporary or permanent.',
   })
   @ApiTags('user')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    status: 200,
+    description:
+      'Password reset completed successfully. The specified password is set in a user pool.',
+  })
   @Post('/reset/password')
   async resetPassword(
     @Body('email') email: string,
     @Body('newPassword') newPassword: string,
-  ): Promise<void> {
+  ): Promise<SuccessResponseDto> {
     await this.authService.resetPassword(email, newPassword);
+    return {
+      success: true,
+      message:
+        'Password reset completed successfully. The specified password is set in a user pool.',
+    };
   }
 
   @ApiOperation({
@@ -79,6 +129,9 @@ export class AuthController {
       'Represents a request to send to the end user email address a confirmation code required to change the password.',
   })
   @ApiTags('user')
+  @ApiOkResponse({
+    status: 200,
+  })
   @Post('/forgot/password')
   async forgotPassword(@Body('email') email: string): Promise<void> {
     await this.authService.initiateForgotPassword(email);
@@ -88,6 +141,10 @@ export class AuthController {
     summary: 'The request representing the confirmation for a password reset.',
   })
   @ApiTags('user')
+  @ApiOkResponse({
+    status: 200,
+    description: 'Password reset confirmed successfully.',
+  })
   @Post('confirm/password')
   async confirmForgotPassword(
     @Body('email') email: string,
