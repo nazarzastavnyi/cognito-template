@@ -33,14 +33,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new ValidationException('JwtStrategy::validate no sub in jwt');
     }
     //const user = await this.userService.getUserBySub(payload.sub); Get user from db by sub
-    if (user === null) {
+    /*if (user === null) {
       throw new ValidationException('JwtStrategy::validate cant find jwt user');
-    }
+    }*/
 
     return {
       sub: payload.sub,
       userPool: payload.iss.split('/').pop(),
-      user: user,
+      // user: user,
     };
   }
 }

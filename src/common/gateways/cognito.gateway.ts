@@ -5,7 +5,7 @@ import {
   AdminCreateUserCommandInput,
   AdminCreateUserCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider';
-import IUserRegistrationGateway from '@common/gateways/interfaces/i-user-registration.gateway';
+import { IUserRegistrationGateway } from '@common/gateways/interfaces/i-user-registration.gateway';
 
 @Injectable()
 class CognitoGateway implements IUserRegistrationGateway {
