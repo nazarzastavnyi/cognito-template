@@ -50,7 +50,7 @@ export class AuthInteractor {
   async confirmForgotPassword(
     email: string,
     newPassword: string,
-    code,
+    code: string,
   ): Promise<void> {
     return await this.userRegistrationGateway.confirmForgotPassword(
       email,

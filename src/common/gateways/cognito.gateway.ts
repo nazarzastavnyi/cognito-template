@@ -233,7 +233,7 @@ class CognitoGateway implements IUserRegistrationGateway {
   async confirmForgotPassword(
     email: string,
     newPassword: string,
-    confirmationCode,
+    confirmationCode: string,
   ): Promise<void> {
     try {
       const secretHash = this.generateSecretHash(email);

@@ -92,12 +92,13 @@ export class AuthController {
   async confirmForgotPassword(
     @Body('email') email: string,
     @Body('newPassword') newPassword: string,
-    @Body('confirmationCode') confirmationCode,
+    @Body('confirmationCode') confirmationCode: string,
   ): Promise<void> {
+    const confirmationCodeAsString = confirmationCode.toString();
     await this.authService.confirmForgotPassword(
       email,
       newPassword,
-      confirmationCode,
+      confirmationCodeAsString,
     );
   }
 

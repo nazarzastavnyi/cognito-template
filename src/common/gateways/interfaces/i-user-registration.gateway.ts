@@ -15,7 +15,7 @@ export interface IUserRegistrationGateway {
   confirmForgotPassword(
     email: string,
     newPassword: string,
-    code,
+    code: string,
   ): Promise<void>;
 }
 
