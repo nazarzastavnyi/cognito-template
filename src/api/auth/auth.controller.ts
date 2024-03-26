@@ -1,7 +1,6 @@
-import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import RegisterRequestDto from './dto/register.request.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import JwtAuthenticationGuard from '@common/auth/guards/jwt.guard';
 import { RegisterCommand } from '@api/auth/dto/register.command';
 import { AuthInteractor } from '@api/auth/auth.interactor';
 import { LoginRequestDto } from './dto/login.request.dto';
@@ -60,11 +59,54 @@ export class AuthController {
     await this.authService.revokeRefreshToken(refreshToken);
   }
 
-  @ApiOperation({ summary: 'Validate jwt token' })
+  @ApiOperation({
+    summary:
+      'Represents the request to reset a user password as an administrator and to set the new user password..',
+  })
+  @ApiTags('user')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthenticationGuard)
-  @Get('validate')
-  validateToken(@Req() request) {
-    return { statusCode: 200, message: 'Token is valid' };
+  @UseGuards(AuthGuard)
+  @Post('/reset/password')
+  async resetPassword(
+    @Body('email') email: string,
+    @Body('newPassword') newPassword: string,
+  ): Promise<void> {
+    await this.authService.resetPassword(email, newPassword);
   }
+
+  @ApiOperation({
+    summary:
+      'Represents a request to send to the end user email address a confirmation code required to change the password.',
+  })
+  @ApiTags('user')
+  @Post('/forgot/password')
+  async forgotPassword(@Body('email') email: string): Promise<void> {
+    await this.authService.initiateForgotPassword(email);
+  }
+
+  @ApiOperation({
+    summary: 'The request representing the confirmation for a password reset.',
+  })
+  @ApiTags('user')
+  @Post('confirm/password')
+  async confirmForgotPassword(
+    @Body('email') email: string,
+    @Body('newPassword') newPassword: string,
+    @Body('confirmationCode') confirmationCode,
+  ): Promise<void> {
+    await this.authService.confirmForgotPassword(
+      email,
+      newPassword,
+      confirmationCode,
+    );
+  }
+
+  //todo ask about remove this endpoint
+  // @ApiOperation({ summary: 'Validate jwt token' })
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthenticationGuard)
+  // @Get('validate')
+  // validateToken(@Req() request) {
+  //   return { statusCode: 200, message: 'Token is valid' };
+  // }
 }

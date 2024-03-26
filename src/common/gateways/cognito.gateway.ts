@@ -20,6 +20,18 @@ import {
   GlobalSignOutCommand,
   RevokeTokenCommandInput,
   RevokeTokenCommand,
+  ForgotPasswordCommand,
+  ConfirmForgotPasswordCommand,
+  ConfirmForgotPasswordCommandInput,
+  AdminResetUserPasswordCommandInput,
+  AdminResetUserPasswordCommandOutput,
+  AdminResetUserPasswordCommand,
+  AdminSetUserPasswordCommandInput,
+  AdminSetUserPasswordCommandOutput,
+  AdminSetUserPasswordCommand,
+  ConfirmForgotPasswordCommandOutput,
+  ForgotPasswordCommandInput,
+  ForgotPasswordCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { IUserRegistrationGateway } from '@common/gateways/interfaces/i-user-registration.gateway';
 import * as crypto from 'crypto';
@@ -180,6 +192,74 @@ class CognitoGateway implements IUserRegistrationGateway {
     }
   }
 
+  async resetPassword(email: string, newPassword: string): Promise<void> {
+    try {
+      await this.initiateAdminResetUserPassword(email);
+      await this.initiateAdminSetUserPassword(email, newPassword);
+
+      console.log('Password reset completed successfully');
+    } catch (error) {
+      console.error('Password reset failed:', error.message);
+      throw new HttpException(
+        `Password reset failed: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async initiateForgotPassword(email: string): Promise<void> {
+    const secretHash = this.generateSecretHash(email);
+    try {
+      const params = {
+        ClientId: this.clientId,
+        Username: email,
+        SecretHash: secretHash,
+      };
+
+      await this.client.send<
+        ForgotPasswordCommandInput,
+        ForgotPasswordCommandOutput
+      >(new ForgotPasswordCommand(params));
+      console.log('Forgot password initiated successfully');
+    } catch (error) {
+      console.error('Forgot password initiation failed:', error.message);
+      throw new HttpException(
+        `Forgot password initiation failed: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async confirmForgotPassword(
+    email: string,
+    newPassword: string,
+    confirmationCode,
+  ): Promise<void> {
+    try {
+      const secretHash = this.generateSecretHash(email);
+      const params: ConfirmForgotPasswordCommandInput = {
+        ClientId: this.clientId,
+        SecretHash: secretHash,
+        Username: email,
+        ConfirmationCode: confirmationCode,
+        Password: newPassword,
+      };
+
+      await this.client.send<
+        ConfirmForgotPasswordCommandInput,
+        ConfirmForgotPasswordCommandOutput
+      >(new ConfirmForgotPasswordCommand(params));
+
+      console.log('Password reset confirmed successfully');
+    } catch (error) {
+      console.error('Password reset confirmation failed:', error.message);
+      throw new HttpException(
+        `Password reset confirmation failed: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   private async respondToNewPasswordChallenge(
     email: string,
     newPassword: string,
@@ -207,6 +287,49 @@ class CognitoGateway implements IUserRegistrationGateway {
       .createHmac('sha256', this.clientSecret)
       .update(`${username}${this.clientId}`)
       .digest('base64');
+  }
+
+  private async initiateAdminResetUserPassword(email: string): Promise<void> {
+    const resetPasswordParams = {
+      UserPoolId: this.userPoolId,
+      Username: email,
+    };
+
+    try {
+      await this.client.send<
+        AdminResetUserPasswordCommandInput,
+        AdminResetUserPasswordCommandOutput
+      >(new AdminResetUserPasswordCommand(resetPasswordParams));
+
+      console.log('Password reset initiated successfully');
+    } catch (error) {
+      console.error('Password reset initiation failed:', error);
+      throw error;
+    }
+  }
+
+  private async initiateAdminSetUserPassword(
+    email: string,
+    newPassword: string,
+  ): Promise<void> {
+    const setPasswordParams = {
+      UserPoolId: this.userPoolId,
+      Username: email,
+      Password: newPassword,
+      Permanent: true,
+    };
+
+    try {
+      await this.client.send<
+        AdminSetUserPasswordCommandInput,
+        AdminSetUserPasswordCommandOutput
+      >(new AdminSetUserPasswordCommand(setPasswordParams));
+
+      console.log('Password reset confirmed successfully');
+    } catch (error) {
+      console.error('Password reset confirmation failed:', error.message);
+      throw error;
+    }
   }
 }
 

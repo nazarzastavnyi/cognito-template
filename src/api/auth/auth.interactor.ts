@@ -38,4 +38,24 @@ export class AuthInteractor {
   async revokeRefreshToken(refreshToken: string): Promise<void> {
     return await this.userRegistrationGateway.revokeRefreshToken(refreshToken);
   }
+
+  async resetPassword(email: string, newPassword: string): Promise<void> {
+    return await this.userRegistrationGateway.resetPassword(email, newPassword);
+  }
+
+  async initiateForgotPassword(email: string): Promise<void> {
+    return await this.userRegistrationGateway.initiateForgotPassword(email);
+  }
+
+  async confirmForgotPassword(
+    email: string,
+    newPassword: string,
+    code,
+  ): Promise<void> {
+    return await this.userRegistrationGateway.confirmForgotPassword(
+      email,
+      code,
+      newPassword,
+    );
+  }
 }

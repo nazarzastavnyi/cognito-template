@@ -10,6 +10,13 @@ export interface IUserRegistrationGateway {
   login(loginRequest: LoginRequestDto): Promise<LoginResponseDto>;
   logout(accessToken: string): Promise<void>;
   revokeRefreshToken(refreshToken: string): Promise<void>;
+  resetPassword(email: string, newPassword: string): Promise<void>;
+  initiateForgotPassword(email: string): Promise<void>;
+  confirmForgotPassword(
+    email: string,
+    newPassword: string,
+    code,
+  ): Promise<void>;
 }
 
 export const UserRegistrationGatewayType = Symbol('IUserRegistrationGateway');
