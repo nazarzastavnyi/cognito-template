@@ -6,6 +6,7 @@ import { RegisterCommand } from '@api/auth/dto/register.command';
 import { AuthInteractor } from '@api/auth/auth.interactor';
 import { LoginRequestDto } from './dto/login.request.dto';
 import { LoginResponseDto } from './dto/login.response.dto';
+import { AuthGuard } from '../../common/auth/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -40,7 +41,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user. Signs out from all devices.' })
   @ApiTags('user')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(AuthGuard)
   @Post('logout/all')
   async globalLogout(@Req() request): Promise<void> {
     const accessToken = request.headers.authorization.split(' ')[1];
@@ -53,7 +54,7 @@ export class AuthController {
   })
   @ApiTags('user')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Body() refreshToken: string): Promise<void> {
     await this.authService.revokeRefreshToken(refreshToken);
