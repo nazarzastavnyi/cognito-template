@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import RegisterRequestDto from './dto/register.request.dto';
 import {
   ApiBearerAuth,
@@ -39,19 +39,18 @@ export class AuthController {
     };
   }
 
-  @ApiOperation({ summary: 'Replace temporary password.' })
+  @ApiOperation({ summary: 'Continue registration with temporary password.' })
   @ApiTags('user')
   @ApiOkResponse({
     status: 201,
     type: LoginResponseDto,
-    description:
-      'Login successful after temporary password is replaced with new password.',
+    description: 'Registration confirmed with temporary password',
   })
   @Post('password')
-  async replaceTemporaryPassword(
+  async confirmRegistration(
     @Body() replaceRequest: LoginRequestDto,
   ): Promise<LoginResponseDto> {
-    return await this.authService.replaceTemporaryPassword(replaceRequest);
+    return await this.authService.confirmRegistration(replaceRequest);
   }
 
   @ApiOperation({ summary: 'Login user.' })
@@ -74,12 +73,17 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({
     status: 200,
+    type: SuccessResponseDto,
     description: 'Logout successful from all devices.',
   })
-  @Post('logout/all')
-  async globalLogout(@Req() request): Promise<void> {
+  @Get('logout/all')
+  async globalLogout(@Req() request): Promise<SuccessResponseDto> {
     const accessToken = request.headers.authorization.split(' ')[1];
     await this.authService.logout(accessToken);
+    return {
+      success: true,
+      message: 'Logout successful from all devices.',
+    };
   }
 
   @ApiOperation({
@@ -91,12 +95,19 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({
     status: 200,
+    type: SuccessResponseDto,
     description: 'Logout successful. Token revoked successfully.',
   })
   @Post('logout')
-  async logout(@Body() refreshToken: LogoutRequestDto): Promise<void> {
+  async logout(
+    @Body() refreshToken: LogoutRequestDto,
+  ): Promise<SuccessResponseDto> {
     const token = refreshToken.refreshToken;
     await this.authService.revokeRefreshToken(token);
+    return {
+      success: true,
+      message: 'Logout successful. Token revoked successfully.',
+    };
   }
 
   @ApiOperation({
@@ -108,6 +119,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({
     status: 200,
+    type: SuccessResponseDto,
     description:
       'Password reset completed successfully. The specified password is set in a user pool.',
   })
@@ -131,10 +143,18 @@ export class AuthController {
   @ApiTags('user')
   @ApiOkResponse({
     status: 200,
+    type: SuccessResponseDto,
   })
   @Post('/forgot/password')
-  async forgotPassword(@Body('email') email: string): Promise<void> {
+  async forgotPassword(
+    @Body('email') email: string,
+  ): Promise<SuccessResponseDto> {
     await this.authService.initiateForgotPassword(email);
+    return {
+      success: true,
+      message:
+        'Password reset initiated successfully. The confirmation code is sent to user email.',
+    };
   }
 
   @ApiOperation({
@@ -143,6 +163,7 @@ export class AuthController {
   @ApiTags('user')
   @ApiOkResponse({
     status: 200,
+    type: SuccessResponseDto,
     description: 'Password reset confirmed successfully.',
   })
   @Post('confirm/password')
@@ -150,13 +171,17 @@ export class AuthController {
     @Body('email') email: string,
     @Body('newPassword') newPassword: string,
     @Body('confirmationCode') confirmationCode: string,
-  ): Promise<void> {
+  ): Promise<SuccessResponseDto> {
     const confirmationCodeAsString = confirmationCode.toString();
     await this.authService.confirmForgotPassword(
       email,
       newPassword,
       confirmationCodeAsString,
     );
+    return {
+      success: true,
+      message: 'Password reset confirmed successfully.',
+    };
   }
 
   //todo ask about remove this endpoint

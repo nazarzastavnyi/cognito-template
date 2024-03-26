@@ -80,7 +80,7 @@ class CognitoGateway implements IUserRegistrationGateway {
     }
   }
 
-  async replaceTemporaryPassword(
+  async confirmRegistration(
     replaceRequest: LoginRequestDto,
   ): Promise<LoginResponseDto> {
     const { email, password } = replaceRequest;
@@ -108,7 +108,9 @@ class CognitoGateway implements IUserRegistrationGateway {
         secretHash,
         authResult.Session,
       );
-      console.log('Login successful after responding to challenge.');
+      console.log(
+        'Confirm registration successful after responding to challenge.',
+      );
       const { AccessToken, ExpiresIn, RefreshToken } =
         response.AuthenticationResult;
       return {
@@ -117,7 +119,7 @@ class CognitoGateway implements IUserRegistrationGateway {
         refreshToken: RefreshToken,
       };
     }
-    throw new BadRequestException('Password is not temporary.');
+    throw new BadRequestException('Confirm registration failed.');
   }
 
   async login(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
