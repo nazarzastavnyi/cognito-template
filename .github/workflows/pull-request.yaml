@@ -8,8 +8,6 @@ jobs:
 
   lint_test_and_build:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
