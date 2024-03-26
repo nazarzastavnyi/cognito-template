@@ -26,6 +26,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.272.0",
     "@aws-sdk/client-lambda": "^3.338.0",
     "@aws-sdk/client-secrets-manager": "^3.272.0",
+    "@aws-sdk/client-sqs": "^3.370.0",
     "@aws-sdk/smithy-client": "^3.272.0",
     "@fast-csv/parse": "^4.3.6",
     "@nestjs/common": "^9.2.1",

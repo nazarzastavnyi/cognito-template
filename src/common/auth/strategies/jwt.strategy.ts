@@ -7,6 +7,7 @@ import {
   GetUserCommand,
   GetUserCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { ValidationException } from '@common/exceptions/validation.exception';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
@@ -25,6 +26,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any) {
-    return !!payload;
+    if (!payload) {
+      return null;
+    }
+    if (!payload.sub) {
+      throw new ValidationException('JwtStrategy::validate no sub in jwt');
+    }
+    //const user = await this.userService.getUserBySub(payload.sub); Get user from db by sub
+    if (user === null) {
+      throw new ValidationException('JwtStrategy::validate cant find jwt user');
+    }
+
+    return {
+      sub: payload.sub,
+      userPool: payload.iss.split('/').pop(),
+      user: user,
+    };
   }
 }
