@@ -54,8 +54,8 @@ export class AuthInteractor {
   ): Promise<void> {
     return await this.userRegistrationGateway.confirmForgotPassword(
       email,
-      code,
       newPassword,
+      code,
     );
   }
 }
