@@ -1,18 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
   AdminCreateUserCommandInput,
   AdminCreateUserCommandOutput,
-  InitiateAuthCommandInput,
-  InitiateAuthCommandOutput,
-  InitiateAuthCommand,
   UserType,
+  AdminInitiateAuthCommandInput,
+  AdminInitiateAuthCommandOutput,
+  AdminInitiateAuthCommand,
+  RespondToAuthChallengeCommandOutput,
+  RespondToAuthChallengeCommandInput,
+  RespondToAuthChallengeCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { IUserRegistrationGateway } from '@common/gateways/interfaces/i-user-registration.gateway';
 import * as crypto from 'crypto';
-
-let testUser = null;
+import { LoginRequestDto } from '../../api/auth/dto/login.request.dto';
+import { LoginResponseDto } from '../../api/auth/dto/login.response.dto';
 
 @Injectable()
 class CognitoGateway implements IUserRegistrationGateway {
@@ -50,27 +58,21 @@ class CognitoGateway implements IUserRegistrationGateway {
         AdminCreateUserCommandOutput
       >(command);
 
-      testUser = result.User;
-      // console.log('🚀 ~ CognitoGateway ~ register ~ testUser:', testUser);
-
       return result.User;
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  async login(loginRequest: any): Promise<any> {
-    const { email, password } = loginRequest;
-    // console.log('🚀 ~ CognitoGateway ~ login ~ password:', password);
-    // console.log('🚀 ~ CognitoGateway ~ login ~ email:', email);
-    // console.log(
-    //   '🚀 ~ CognitoGateway ~ login ~ testUser.Username:',
-    //   testUser.Username,
-    // );
+  async replaceTemporaryPassword(
+    replaceRequest: LoginRequestDto,
+  ): Promise<LoginResponseDto> {
+    const { email, password } = replaceRequest;
+    const secretHash = this.generateSecretHash(email);
 
-    const secretHash = this.generateSecretHash(testUser.Username);
-    const authParams: InitiateAuthCommandInput = {
-      AuthFlow: 'USER_PASSWORD_AUTH',
+    const authParams: AdminInitiateAuthCommandInput = {
+      UserPoolId: this.userPoolId,
+      AuthFlow: 'ADMIN_USER_PASSWORD_AUTH',
       ClientId: this.clientId,
       AuthParameters: {
         USERNAME: email,
@@ -78,29 +80,96 @@ class CognitoGateway implements IUserRegistrationGateway {
         SECRET_HASH: secretHash,
       },
     };
+    const authResult: AdminInitiateAuthCommandOutput = await this.client.send<
+      AdminInitiateAuthCommandInput,
+      AdminInitiateAuthCommandOutput
+    >(new AdminInitiateAuthCommand(authParams));
 
+    if (authResult.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
+      const response = await this.respondToNewPasswordChallenge(
+        email,
+        password,
+        secretHash,
+        authResult.Session,
+      );
+      console.log('Login successful after responding to challenge.');
+      const { AccessToken, ExpiresIn, RefreshToken } =
+        response.AuthenticationResult;
+      return {
+        accessToken: AccessToken,
+        expiresIn: ExpiresIn,
+        refreshToken: RefreshToken,
+      };
+    }
+    throw new BadRequestException('Password is not temporary.');
+  }
+
+  async login(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
     try {
-      const authResult: InitiateAuthCommandOutput = await this.client.send<
-        InitiateAuthCommandInput,
-        InitiateAuthCommandOutput
-      >(new InitiateAuthCommand(authParams));
+      const { email, password } = loginRequest;
+      const secretHash = this.generateSecretHash(email);
 
-      const token = authResult.AuthenticationResult?.IdToken;
-      console.log('Login successful. IdToken:', token);
+      const authParams: AdminInitiateAuthCommandInput = {
+        UserPoolId: this.userPoolId,
+        AuthFlow: 'ADMIN_USER_PASSWORD_AUTH',
+        ClientId: this.clientId,
+        AuthParameters: {
+          USERNAME: email,
+          PASSWORD: password,
+          SECRET_HASH: secretHash,
+        },
+      };
+      const authResult: AdminInitiateAuthCommandOutput = await this.client.send<
+        AdminInitiateAuthCommandInput,
+        AdminInitiateAuthCommandOutput
+      >(new AdminInitiateAuthCommand(authParams));
 
-      return token || '';
+      if (authResult.AuthenticationResult) {
+        console.log('Login successful.');
+        const { AccessToken, ExpiresIn, RefreshToken } =
+          authResult.AuthenticationResult;
+        return {
+          accessToken: AccessToken,
+          expiresIn: ExpiresIn,
+          refreshToken: RefreshToken,
+        };
+      }
+      throw new Error(authResult.ChallengeName);
     } catch (error) {
-      console.error('Login failed:', error);
-      throw new Error('Login failed');
+      throw new HttpException(
+        `Login failed: ${error.message}`,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
 
+  private async respondToNewPasswordChallenge(
+    email: string,
+    newPassword: string,
+    secretHash: string,
+    session: string,
+  ): Promise<RespondToAuthChallengeCommandOutput> {
+    const challengeParams: RespondToAuthChallengeCommandInput = {
+      ChallengeName: 'NEW_PASSWORD_REQUIRED',
+      ClientId: this.clientId,
+      ChallengeResponses: {
+        USERNAME: email,
+        NEW_PASSWORD: newPassword,
+        SECRET_HASH: secretHash,
+      },
+      Session: session,
+    };
+
+    return await this.client.send(
+      new RespondToAuthChallengeCommand(challengeParams),
+    );
+  }
+
   private generateSecretHash(username: string): string {
-    const data = username + this.clientId;
     return crypto
       .createHmac('sha256', this.clientSecret)
-      .update(data)
-      .digest('hex');
+      .update(`${username}${this.clientId}`)
+      .digest('base64');
   }
 }
 
