@@ -41,7 +41,7 @@ export class AuthController {
   @ApiTags('user')
   @ApiBearerAuth()
   @UseGuards(JwtAuthenticationGuard)
-  @Post('logout')
+  @Post('logout/all')
   async globalLogout(@Req() request): Promise<void> {
     const accessToken = request.headers.authorization.split(' ')[1];
     await this.authService.logout(accessToken);
@@ -54,8 +54,8 @@ export class AuthController {
   @ApiTags('user')
   @ApiBearerAuth()
   @UseGuards(JwtAuthenticationGuard)
-  @Post('revoke-refresh-token')
-  async revokeRefreshToken(@Body() refreshToken: string): Promise<void> {
+  @Post('logout')
+  async logout(@Body() refreshToken: string): Promise<void> {
     await this.authService.revokeRefreshToken(refreshToken);
   }
 
