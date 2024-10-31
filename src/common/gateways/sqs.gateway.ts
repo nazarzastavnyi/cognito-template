@@ -1,8 +1,4 @@
-import {
-  SendMessageCommand,
-  SendMessageRequest,
-  SQSClient,
-} from '@aws-sdk/client-sqs';
+import { SendMessageRequest, SQSClient } from '@aws-sdk/client-sqs';
 import { Injectable } from '@nestjs/common';
 import { INotificationGateway } from '@common/gateways/interfaces/i-notification.gateway';
 
@@ -26,9 +22,7 @@ export class SqsGateway implements INotificationGateway {
       MessageGroupId: group,
       DelaySeconds: 0,
     };
-    /*return this.sqsClient.send(new SendMessageCommand(params)).catch((err) => {
-      throw err;
-    });*/
+    return params;
   }
 
   async sendNotificationMessage(messageBody: any): Promise<boolean> {

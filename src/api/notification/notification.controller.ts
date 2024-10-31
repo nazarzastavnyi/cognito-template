@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import JwtAuthenticationGuard from '@common/auth/guards/jwt.guard';
 import {
@@ -14,7 +14,7 @@ export class NotificationController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthenticationGuard)
   @Post()
-  async sendNotification(@Req() request) {
+  async sendNotification() {
     await this.notificationService.sendNotification([1], 'Test notification', [
       NotificationTypes.PUSH,
       NotificationTypes.EMAIL,

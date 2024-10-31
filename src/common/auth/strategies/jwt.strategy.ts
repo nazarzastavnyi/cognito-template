@@ -1,12 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { passportJwtSecret } from 'jwks-rsa';
-import {
-  CognitoIdentityProviderClient,
-  GetUserCommand,
-  GetUserCommandOutput,
-} from '@aws-sdk/client-cognito-identity-provider';
 import { ValidationException } from '@common/exceptions/validation.exception';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
